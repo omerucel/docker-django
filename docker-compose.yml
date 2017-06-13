@@ -1,0 +1,13 @@
+version: '2'
+
+services:
+  app:
+    container_name: django_app
+    build: .
+    command: sh start.sh
+    ports:
+      - 80
+    environment:
+      DJANGO_SETTINGS_MODULE: project.settings.development
+    volumes:
+      - ./:/data/project
