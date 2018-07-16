@@ -1,13 +1,44 @@
-version: '2'
-
+version: '3'
 services:
   app:
     container_name: django_app
     build: .
-    command: sh start.sh
-    ports:
-      - 80
+    command: sh /data/project/var/docker-files/start.sh
     environment:
       DJANGO_SETTINGS_MODULE: project.settings.development
+      GUNICORN_CMD_ARGS: --bind 0.0.0.0:8080 --workers 3 --chdir /data/project --reload
     volumes:
+      - ./:/data/project
+    depends_on:
+      - mysql
+      - postgres
+
+  mysql:
+    container_name: django_mysql
+    image: mysql:5.6
+    ports:
+      - 3306
+    environment:
+      MYSQL_DATABASE: project
+      MYSQL_ROOT_PASSWORD: 123456
+
+  postgres:
+    container_name: django_postgres
+    image: postgres
+    ports:
+      - 5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: project
+
+  nginx:
+    container_name: django_nginx
+    image: nginx
+    ports:
+      - 80
+    depends_on:
+      - app
+    volumes:
+      - ./var/docker-files/vhost.conf:/etc/nginx/conf.d/default.conf
       - ./:/data/project
